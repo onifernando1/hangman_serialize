@@ -1,22 +1,18 @@
+# frozen_string_literal: true
+
 # #Put everything into one class
 # # stop same letter being entered
 # # save game
 # # resume game
 
+require 'yaml'
 
-class Game 
-  
+class Game
   def initialize
     @word = 'hey'
-  #   # @game_running = true
-  #   # @p_guess = 'AB'
     @guess = 12
-  #   # @p_guess = p_guess
-  #   # @word = word
-  #   # @hint = hint
-  #   # @game_running = true
   end
-  
+
   def random_word
     @fname = 'google-10000-english-no-swears.txt'
 
@@ -32,13 +28,12 @@ class Game
   end
 
   def correct_size_of_word
-
     until @word.length > 5 && @word.length < 12
-      random_word()
-      puts "#{@word}"
+      random_word
+      puts @word.to_s
       @word
     end
-  end 
+  end
 
   def make_hint
     if @word.length > 4
@@ -49,9 +44,9 @@ class Game
   end
 
   def player_guess
-    puts 'Guess a letter'
+    puts "Guess a letter (or type 'save' to save)"
     @p_guess = gets.chomp.downcase
-    if @p_guess.length > 1 || @p_guess.empty?
+    if @p_guess != "save" && @p_guess.length > 1 || @p_guess.empty?
       puts 'INVALID'
       @p_guess = gets.chomp
     end
@@ -84,17 +79,27 @@ class Game
     end
   end
 
-  def round()
-    until @p_guess == @word || @guess.zero?
+
+  def save_game
+      
+    @serialized_object = YAML.dump(self)
+    @saved_game = @serialized_object
+    puts @saved_game
+  end
+
+
+  # || @p_guess == "save"
+  def round
+    until @p_guess == @word || @guess.zero? 
       player_guess()
+      if @p_guess == "save"
+        save_game()
+      end 
       add_to_hint()
       check_win()
-
-      if @word.include?(@p_guess)
-        @guess += 1
-        # puts "#NEW #{player.guess}"
-      end
-      guesses()
+      
+      @guess += 1 if @word.include?(@p_guess)
+      guesses
 
       @guess = 0 if @game_running == false
     end
@@ -102,13 +107,24 @@ class Game
     puts @word
   end
 
+  def game_play
+    correct_size_of_word
+    make_hint
+    round
+  end
 
-end 
+end
+
+class LoadingGame
+
+  def load_game
+    @load = YAML.safe_load(@saved_game)
+    # puts @load
+  end
+end
 
 game = Game.new
-game.correct_size_of_word()
-game.make_hint()
-# game.player_guess()
-# game.add_to_hint()
-# game.check_win()
-game.round()
+game.game_play
+game.save_game()
+load = LoadingGame.new
+# load.load_game
