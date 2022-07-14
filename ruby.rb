@@ -1,10 +1,5 @@
 # frozen_string_literal: true
 
-# #Put everything into one class
-# # stop same letter being entered
-# # save game
-# # resume game
-
 require 'yaml'
 
 class Game
@@ -23,7 +18,7 @@ class Game
         @word = line if idx == @randnum
       end
     end
-    puts @word
+    # puts @word
     @word
   end
 
@@ -46,9 +41,9 @@ class Game
   def player_guess
     puts "Guess a letter (type 'save' to save/ 'load' to load)"
     @p_guess = gets.chomp.downcase
-    if @p_guess != "save" && @p_guess != "load" && @p_guess != "quit" && @p_guess.length > 1 || @p_guess.empty?
+    if @p_guess != 'save' && @p_guess != 'load' && @p_guess != 'quit' && @p_guess.length > 1 || @p_guess.empty?
       puts 'INVALID'
-      @p_guess = gets.chomp
+      # @p_guess = gets.chomp
     end
     @guess -= 1
     @p_guess
@@ -79,51 +74,36 @@ class Game
     end
   end
 
-
-  # def game_to_YAML
-  #   @serialized_object = YAML.dump(self)
-  #   @saved_game = @serialized_object
-  #   @saved_game
-  # end 
-
-  # def save_game_file
-  #   @fname = "game1.yml"
-  #   @file = File.open(@fname, "w")
-  #   @file.puts "#{@saved_game}"
-  #   @file.close
-
-  # end 
-
   def save_game
+    File.delete('save_game.yml')
     File.open('save_game.yml', 'w') { |file| file.write(YAML.dump(self)) }
-    puts "GAME SAVED"
-  
+    puts 'GAME SAVED'
   end
 
   def load_game
-    file = File.open("save_game.yml", "r")
+    file = File.open('save_game.yml', 'r')
     game = YAML.unsafe_load(file)
-    p game 
-    game.game_play()
+    puts 'GAME LOADED'
+    @p_guess = 'quit'
+    game.game_play
   end
 
   # || @p_guess == "save"
   def round
-    until @p_guess == @word || @guess.zero? 
-      player_guess()
-      if @p_guess == "save"
-        save_game()
-      end 
-      if @p_guess == "load"
-        load_game()
-        puts "LOADED"
-      end 
-      if @p_guess == "quit"
+    until @p_guess == @word || @guess.zero? || @p_guess == 'quit'
+      player_guess
+      case @p_guess
+      when 'save'
+        save_game
+      when 'load'
+        load_game
+        puts 'LOADED'
+      when 'quit'
         break
-      end 
-      add_to_hint()
-      check_win()
-      
+      end
+      add_to_hint
+      check_win
+
       @guess += 1 if @word.include?(@p_guess)
       guesses
 
@@ -138,11 +118,7 @@ class Game
     make_hint
     round
   end
-
-
 end
 
-
-
 game = Game.new
-game.game_play()
+game.game_play
