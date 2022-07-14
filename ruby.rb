@@ -44,9 +44,9 @@ class Game
   end
 
   def player_guess
-    puts "Guess a letter (or type 'save' to save)"
+    puts "Guess a letter (type 'save' to save/ 'load' to load)"
     @p_guess = gets.chomp.downcase
-    if @p_guess != "save" && @p_guess.length > 1 || @p_guess.empty?
+    if @p_guess != "save" && @p_guess != "load" && @p_guess != "quit" && @p_guess.length > 1 || @p_guess.empty?
       puts 'INVALID'
       @p_guess = gets.chomp
     end
@@ -80,13 +80,32 @@ class Game
   end
 
 
+  # def game_to_YAML
+  #   @serialized_object = YAML.dump(self)
+  #   @saved_game = @serialized_object
+  #   @saved_game
+  # end 
+
+  # def save_game_file
+  #   @fname = "game1.yml"
+  #   @file = File.open(@fname, "w")
+  #   @file.puts "#{@saved_game}"
+  #   @file.close
+
+  # end 
+
   def save_game
-      
-    @serialized_object = YAML.dump(self)
-    @saved_game = @serialized_object
-    puts @saved_game
+    File.open('save_game.yml', 'w') { |file| file.write(YAML.dump(self)) }
+    puts "GAME SAVED"
+  
   end
 
+  def load_game
+    file = File.open("save_game.yml", "r")
+    game = YAML.unsafe_load(file)
+    p game 
+    game.game_play()
+  end
 
   # || @p_guess == "save"
   def round
@@ -94,6 +113,13 @@ class Game
       player_guess()
       if @p_guess == "save"
         save_game()
+      end 
+      if @p_guess == "load"
+        load_game()
+        puts "LOADED"
+      end 
+      if @p_guess == "quit"
+        break
       end 
       add_to_hint()
       check_win()
@@ -113,18 +139,10 @@ class Game
     round
   end
 
+
 end
 
-class LoadingGame
 
-  def load_game
-    @load = YAML.safe_load(@saved_game)
-    # puts @load
-  end
-end
 
 game = Game.new
-game.game_play
-game.save_game()
-load = LoadingGame.new
-# load.load_game
+game.game_play()
